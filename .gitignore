@@ -1,5 +1,7 @@
 *.class
 *~
+.model_object_saved
+
 #eclipse project files
 .classpath
 .project
