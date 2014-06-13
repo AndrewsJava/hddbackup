@@ -1,19 +1,22 @@
 package harlequinmettle.backup;
 
-import harlequinmettle.utils.filetools.ChooseFilePrompter;
 import harlequinmettle.utils.filetools.SerializationTool;
 import harlequinmettle.utils.guitools.JScrollPanelledPane;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 
 public class BackupUtility {
 	static final String serializedModel = ".model_object_saved";
@@ -33,19 +36,26 @@ public class BackupUtility {
 		restoreObjectIfPossible();
 		JFrame applicationFrame = new JFrame();
 		app = applicationFrame;
-		applicationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		applicationFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		applicationFrame.setSize(1200, 200);
 		applicationFrame.setVisible(true);
 		JTabbedPane jtp = new JTabbedPane();
 		applicationFrame.add(jtp);
-		jtp.add("backups", makeBackupThreadList());
+		jtp.add("backups", makeBackupThreadList(applicationFrame));
 		// jtp.add("backup", generateBackupPannel(1));
 		// jtp.add("history", generateBackupPannel(2));
 	}
 
-	private Component makeBackupThreadList() {
+	private Component makeBackupThreadList(JFrame applicationFrame) {
 
 		JScrollPanelledPane list = new JScrollPanelledPane();
+
+		JCheckBox killOnClose = new JCheckBox(
+				"Stop Threads When Window Is Closed");
+		//killOnClose.setSelected(true);
+		killOnClose.addItemListener(makeKillItemListener(applicationFrame));
+
+		list.addComp(killOnClose);
 		JButton addNewBackupDef = new JButton("add new definition");
 		addNewBackupDef.addActionListener(makeDefinitionLauchListener(null));
 		list.addComp(addNewBackupDef);
@@ -67,6 +77,29 @@ public class BackupUtility {
 
 		}
 		return list;
+	}
+
+	private ItemListener makeKillItemListener(final JFrame applicationFrame) {
+
+		return new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				JCheckBox killOnClose = (JCheckBox) (arg0.getSource());
+				boolean killOrNot = killOnClose.isSelected();
+				if (killOrNot) {
+					for (BackupUtilityThread backup : backupThreads.values()) {
+						backup.quit = true;
+					}
+					applicationFrame
+							.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+				} else {
+					applicationFrame
+							.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				}
+			}
+		};
+
 	}
 
 	private ActionListener makeDefinitionLauchListener(
