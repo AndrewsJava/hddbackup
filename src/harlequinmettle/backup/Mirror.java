@@ -145,7 +145,7 @@ public class Mirror {
 	// checks if there is no backup OR modifiedDate is different
 	protected boolean isChanged(File og, File bkup) {
 		boolean hasChanged = (!bkup.exists() || og.lastModified() > bkup
-				.lastModified());
+				.lastModified()+1000);
 		if (hasChanged) {
 			System.out.println("files changed so far: " + count++);
 			System.out.println("        " + og);
