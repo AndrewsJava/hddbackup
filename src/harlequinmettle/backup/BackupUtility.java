@@ -19,7 +19,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
 public class BackupUtility {
-	static final String serializedModel = ".model_object_saved";
+	static final String serializedModel = ".backup_utility_thread_model_object";
 	static TreeMap<String, BackupDefinitionModel> backupModels = new TreeMap<String, BackupDefinitionModel>();
 	static TreeMap<String, BackupUtilityThread> backupThreads = new TreeMap<String, BackupUtilityThread>();
 	JFrame app;
@@ -135,12 +135,12 @@ public class BackupUtility {
 	private void restoreObjectIfPossible() {
 
 		if (new File(serializedModel).exists())
-			backupModels = SerializationTool.deserialize(
+			backupModels = new SerializationTool().deserialize(
 					backupModels.getClass(), serializedModel);
 
 	}
 
 	static void saveObjects() {
-		SerializationTool.serialize(backupModels, serializedModel);
+		new SerializationTool().serialize(backupModels, serializedModel);
 	}
 }

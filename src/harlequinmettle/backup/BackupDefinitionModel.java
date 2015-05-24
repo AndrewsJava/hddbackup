@@ -1,9 +1,13 @@
 package harlequinmettle.backup;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import org.apache.commons.io.FileUtils;
 
 public class BackupDefinitionModel implements Serializable {
 
@@ -20,15 +24,18 @@ public class BackupDefinitionModel implements Serializable {
 	boolean applyInclusions = false;
 	boolean applyExclusions = false;
 	int iterations = 60000;
-public BackupDefinitionModel(){
-//	inclusions.put(".java", true);
-//	inclusions.put(".txt", true);
-//	inclusions.put(".xml", true); 
-//	inclusions.put(".html", true);
-//	
-//	exclusions.put(".jar", true);
-//	exclusions.put(".class", true); 
-}
+
+	public BackupDefinitionModel() {
+		inclusions.put(".java", true);
+		// inclusions.put(".txt", true);
+		// inclusions.put(".xml", true);
+		// inclusions.put(".html", true);
+		// inclusions.put(".csv", true);
+		//
+		// exclusions.put(".jar", true);
+		// exclusions.put(".class", true);
+	}
+
 	public String[] getInclusionList() {
 		return inclusions.keySet().toArray(new String[inclusions.size()]);
 	}
@@ -40,16 +47,25 @@ public BackupDefinitionModel(){
 	ArrayList<String> ignoreFileExtensions = new ArrayList<String>();
 
 	public void mapFiles() {
-		System.out.println("limiting file backup to: "+inclusions);
+		System.out.println("limiting file backup to: " + inclusions);
 		for (Entry<String, Boolean> moveFrom : origins.entrySet()) {
 			for (Entry<String, Boolean> moveTo : destinations.entrySet()) {
 				if (moveFrom.getValue() && moveTo.getValue()) {
-					Mirror fileCopier = new Mirror(moveFrom.getKey(),
-							moveTo.getKey());
-					fileCopier.mirrorNodeFiles(inclusions);    
+					HistoryPreservingMirror fileCopier = new HistoryPreservingMirror(moveFrom.getKey(), moveTo.getKey());
+					fileCopier.mirrorNodeFiles(inclusions);
 				}
 			}
 		}
+
+	}
+
+	public void clearDestinationDirectory() {
+		for (Entry<String, Boolean> moveTo : destinations.entrySet())
+			try {
+				FileUtils.deleteDirectory(new File(moveTo.getKey()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 	}
 }

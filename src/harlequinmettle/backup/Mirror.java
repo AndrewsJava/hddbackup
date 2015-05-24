@@ -1,5 +1,7 @@
 package harlequinmettle.backup;
 
+import harlequinmettle.utils.filetools.FileTools;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ public class Mirror {
 
 	public void clearOutEmptyFiles() {
 		clearOutEmptyFiles(destinationsFilePath);
-		// clearOutEmptyFiles(ORIGIN);
+		// clearOutEmptyFiles(ORIGIN); asdfasdfasdfasdf
 	}
 
 	private void clearOutEmptyFiles(String backup2) {
@@ -93,18 +95,19 @@ public class Mirror {
 				if (fileTypeFilter != null) {
 					String fileName = original.getName();
 
-					for (String fileEnding : fileTypeFilter) {
-						if (fileName.endsWith(fileEnding)) {
+					for (String regex : fileTypeFilter) {
+						if (fileName.matches(regex)) {
 							shouldBackup = true;
 							break;
 						}
 					}
 				}
 				if (shouldBackup) {
-					File copied = new File(original.getAbsolutePath()
-							.replaceAll(originsFilePath, destinationsFilePath));
+
+					File copied = new File(original.getAbsolutePath().replaceAll(originsFilePath, destinationsFilePath));
 
 					if (isChanged(original, copied)) {
+
 						try {
 							FileUtils.copyFile(original, copied);
 							Thread.yield();
@@ -117,6 +120,19 @@ public class Mirror {
 				}
 			}
 		}
+	}
+
+	private boolean isValidText(File original) {
+		String textFromFile = FileTools.tryToReadFileToString(original, null);
+
+		if (textFromFile == null)
+			return false;
+
+		if (!textFromFile.matches("^[\\u0000-\\u007F]*$")) {
+			System.out.println("file of text DOES NOT matches ascii:  " + original.getAbsolutePath());
+			return false;
+		}
+		return true;
 	}
 
 	// start of recursive pass, with NODE on backupHDD
@@ -144,8 +160,9 @@ public class Mirror {
 
 	// checks if there is no backup OR modifiedDate is different
 	protected boolean isChanged(File og, File bkup) {
-		boolean hasChanged = (!bkup.exists() || og.lastModified() > bkup
-				.lastModified()+1000);
+		if (!isValidText(og))
+			return false;
+		boolean hasChanged = (!bkup.exists() || og.lastModified() > bkup.lastModified() + 1000);
 		if (hasChanged) {
 			System.out.println("files changed so far: " + count++);
 			System.out.println("        " + og);

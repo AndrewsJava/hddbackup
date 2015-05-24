@@ -7,25 +7,29 @@ public class BackupUtilityThread extends Thread {
 	BackupDefinitionModel modelData;
 	public boolean quit = false;
 
-	public BackupUtilityThread(BackupDefinitionModel modelData) { 
+	public BackupUtilityThread(BackupDefinitionModel modelData) {
 		this.modelData = modelData;
 	}
-	public BackupUtilityThread( ) { 
-		this.modelData = new BackupDefinitionModel() ;
+
+	public BackupUtilityThread() {
+		this.modelData = new BackupDefinitionModel();
 		this.modelData.iterations = 1;
 	}
 
 	@Override
 	public void run() {
-		System.out.println("interval for thread: "+modelData.interval);
-		for(int i = 0;i<modelData.iterations; i++) {
-if(quit )break;
+		System.out.println("interval for thread: " + modelData.interval);
+		for (int i = 0; i < modelData.iterations; i++) {
+			if (quit)
+				break;
+			// if (i == 0)
+			// modelData.clearDestinationDirectory();
 			System.out.println(new Date());
-			mapFiles();      
+			mapFiles();
 			System.out.println(new Date());
-			
+
 			try {
-				System.out.println("interval for thread: "+modelData.interval);
+				System.out.println("interval for thread: " + modelData.interval);
 				Thread.sleep(modelData.interval * 1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -37,7 +41,7 @@ if(quit )break;
 
 	private void mapFiles() {
 		System.out.println("mapping files");
-modelData.mapFiles();
+		modelData.mapFiles();
 	}
 
 }
